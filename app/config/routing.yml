@@ -1,0 +1,7 @@
+moop_fat_secret:
+    resource: @MoopFatSecretBundle/Controller/
+    type:     annotation
+
+app:
+    resource: @AppBundle/Controller/
+    type:     annotation

@@ -1,0 +1,15 @@
+services:
+#    moop_fat_secret.example:
+#        class: Moop\Bundle\FatSecretBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]
+    moop.oauth.version_one:
+        class: Moop\Bundle\FatSecretBundle\Utility\OAuth
+        arguments: [@buzz.browser, %moop.fs.consumer_key%, %moop.fs.consumer_secret%]
+    moop.fat_secret.api:
+        class: Moop\Bundle\FatSecretBundle\API\FatSecret
+        arguments: [@moop.oauth.version_one, %moop.fs.api_base_url%]
+    buzz.browser:
+        class: Buzz\Browser
+        arguments: [@buzz.client.curl]
+    buzz.client.curl:
+        class: Buzz\Client\Curl

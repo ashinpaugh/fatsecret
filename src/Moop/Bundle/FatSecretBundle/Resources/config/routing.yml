@@ -1,0 +1,3 @@
+moop_fat_secret_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: MoopFatSecretBundle:Default:index }
