@@ -1,0 +1,14 @@
+services:
+    redis:
+        class: Redis
+        calls:
+            - [connect, ["%moop.fs.cache.redis.host%", "%moop.fs.cache.redis.port%"]]
+    
+    moop.fat_secret.cache.array:
+        class: "%moop.fs.cache.array.class%"
+    
+    moop.fat_secret.cache.redis:
+        class: "%moop.fs.cache.redis.class%"
+        calls:
+            - [setRedis, ["@redis"]]
+    

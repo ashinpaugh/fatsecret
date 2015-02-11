@@ -28,5 +28,31 @@ class MoopFatSecretExtension extends Extension
         $container->setParameter('moop.fs.api_base_url',    $config['api_base_url']);
         $container->setParameter('moop.fs.consumer_key',    $config['consumer_key']);
         $container->setParameter('moop.fs.consumer_secret', $config['consumer_secret']);
+        
+        $this->rLoad($container, 'moop.fs.cache.', $config['cache_providers']);
+        
+        // {@see DynamicServiceCompilerPass}
+        $container->setParameter(
+            'moop.fs.cache.provider.id',
+            vsprintf("moop.fat_secret.cache.%s", [$config['cache_provider_type']])
+        );
     }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param String           $prefix
+     * @param array            $params
+     */
+    protected function rLoad(ContainerBuilder $container, $prefix, array $params)
+    {
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                $this->rLoad($container, $prefix . "$key.", $value);
+                continue;
+            }
+            
+            $container->setParameter($prefix . "$key", $value);
+        }
+    }
+
 }
