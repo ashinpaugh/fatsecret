@@ -2,6 +2,7 @@
 
 namespace Moop\Bundle\FatSecretBundle\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -12,11 +13,9 @@ class DynamicServiceCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $cache_id  = $container->getParameter('moop.fs.cache.provider.id');
-        
-        $container->setDefinition(
+        $container->setAlias(
             'moop.fat_secret.cache',
-            $container->getDefinition($cache_id)
+            $container->getParameter('moop.fs.cache.provider.id')
         );
     }
 }

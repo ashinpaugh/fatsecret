@@ -124,7 +124,7 @@ class OAuth
         }
         
         if (array_key_exists('oauth_token_secret', $params)) {
-            $this->oauth_token = $params['oauth_token_secret'];
+            $this->oauth_token_secret = $params['oauth_token_secret'];
             unset($params['oauth_token_secret']);
         }
         
@@ -213,7 +213,6 @@ class OAuth
     public function setOAuthTokenSecret($oauth_token_secret)
     {
         $this->oauth_token_secret = $oauth_token_secret;
-        
         return $this;
     }
 }

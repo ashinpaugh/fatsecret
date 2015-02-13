@@ -3,6 +3,7 @@
 namespace Moop\Bundle\FatSecretBundle\API;
 
 use Doctrine\Common\Cache\CacheProvider;
+use Moop\Bundle\FatSecretBundle\Exception\FatException;
 use Moop\Bundle\FatSecretBundle\Utility\OAuth;
 use stdClass;
 
@@ -30,12 +31,18 @@ class FatSecret
     protected $base_url;
     
     /**
+     * @var String
+     */
+    protected $format;
+    
+    /**
      * @Construct.
      * 
      * @param String $base_url
      */
     public function __construct(CacheProvider $cache, OAuth $client, $base_url)
     {
+        $this->format       = 'json';
         $this->cache        = $cache;
         $this->oauth_client = $client;
         $this->base_url     = $base_url;
@@ -88,8 +95,10 @@ class FatSecret
      *
      * @return Array
      */
-    public function getProfile($auth_token, $auth_secret)
+    public function getProfile($auth_token = null, $auth_secret = null)
     {
+        $this->checkAndSyncTokens($auth_token, $auth_secret);
+        
         return $this->makeRequest('GET',  [
             'method'             => 'profile.get',
             'oauth_token'        => $auth_token,
@@ -151,6 +160,80 @@ class FatSecret
     }
     
     /**
+     * Fetches the Exercise types supported by FatSecret.
+     * Should be cached for a long period of time.
+     * 
+     * @return Array
+     */
+    public function getExercisesTypes()
+    {
+        return $this->makeRequest('GET', [
+            'method' => 'exercises.get',
+        ]);
+    }
+    
+    public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'lb', $height_type = 'inch', $auth_token = null, $auth_secret = null)
+    {
+        $this->checkAndSyncTokens($auth_token, $auth_secret);
+        
+        return $this->makeRequest('POST', [
+            'method'             => 'weight.update',
+            'oauth_token'        => $auth_token,
+            'oauth_token_secret' => $auth_secret,
+            'current_weight_kg'  => $weight,
+            'current_height_cm'  => $height_cm,
+            'weight_type'        => $weight_type,
+            'height_type'        => $height_type,
+            'goal_weight_kg'     => $goal_weight_kg
+        ]);
+    }
+    
+    /**
+     * Sets the OAuth tokens for a user so we don't have to pass in the
+     * tokens to the actual requests.
+     * 
+     * @param FatUserInterface $user
+     *
+     * @return $this
+     */
+    public function setUserOAuthTokens(FatUserInterface $user)
+    {
+        $this->getOAuthClient()
+            ->setOAuthToken($user->getOAuthToken())
+            ->setOAuthTokenSecret($user->getOAuthTokenSecret())
+        ;
+        
+        return $this;
+    }
+    
+    /**
+     * Get FatSecret's response format.
+     * 
+     * @return $this
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+    
+    /**
+     * Set FatSecret's response format.
+     *
+     * @param String $format
+     *
+     * @return $this
+     * @throws FatException
+     */
+    public function setFormat($format)
+    {
+        if (!in_array($format, ['json', 'xml'])) {
+            throw new FatException('Invalid format set: ' . $format);
+        }
+        
+        return $this;
+    }
+    
+    /**
      * Make the OAuth request to FS.
      * 
      * @param String $method
@@ -167,7 +250,7 @@ class FatSecret
             return $content;
         }
         
-        $params   = array_merge($params, ['format' => 'json']);
+        $params   = array_merge($params, ['format' => $this->getFormat()]);
         $response = $this->getOAuthClient()->send($this->base_url, $params, $method);
         $result   = json_decode($response->getContent(), true);
         
@@ -187,5 +270,42 @@ class FatSecret
     protected function getOAuthClient()
     {
         return $this->oauth_client;
+    }
+    
+    /**
+     * Ensures that valid OAuth tokens are passed to the API.
+     * 
+     * @param String &$auth_token
+     * @param String &$auth_secret
+     *
+     * @throws FatException
+     */
+    protected function checkAndSyncTokens(&$auth_token, &$auth_secret)
+    {
+        if ($auth_token && $auth_secret) {
+            return;
+        }
+        
+        $this->checkOAuthTokenPresence();
+        
+        $auth_token  = $this->getOAuthClient()->getOAuthToken();
+        $auth_secret = $this->getOAuthClient()->getOAuthTokenSecret();
+    }
+    
+    /**
+     * See if the OAuth tokens were set when required by the API.
+     * 
+     * @return bool
+     * @throws FatException
+     */
+    private function checkOAuthTokenPresence()
+    {
+        $client = $this->getOAuthClient();
+        
+        if (!$client->getOAuthToken() || !$client->getOAuthTokenSecret()) {
+            throw new FatException('One or more OAuth tokens were not found.');
+        }
+        
+        return true;
     }
 }
