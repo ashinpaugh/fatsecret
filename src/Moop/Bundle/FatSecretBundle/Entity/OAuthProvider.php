@@ -5,6 +5,9 @@ namespace Moop\Bundle\FatSecretBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity()
+ */
 class OAuthProvider
 {
     const v1 = '1';
