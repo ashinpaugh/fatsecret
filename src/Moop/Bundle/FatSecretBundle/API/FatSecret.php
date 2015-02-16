@@ -2,6 +2,9 @@
 
 namespace Moop\Bundle\FatSecretBundle\API;
 
+use Buzz\Client\AbstractClient;
+use Buzz\Client\ClientInterface;
+use Buzz\Exception\RequestException;
 use Doctrine\Common\Cache\CacheProvider;
 use Moop\Bundle\FatSecretBundle\Exception\FatException;
 use Moop\Bundle\FatSecretBundle\Utility\OAuth;
@@ -48,10 +51,7 @@ class FatSecret
         $this->base_url     = $base_url;
         
         // FS can timeout occasionally - give it time to breathe.
-        $this->getOAuthClient()->getHttpClient()
-            ->getClient()
-            ->setTimeout(15)
-        ;
+        $this->setTimeout(15);
     }
     
     /**
@@ -250,9 +250,13 @@ class FatSecret
             return $content;
         }
         
-        $params   = array_merge($params, ['format' => $this->getFormat()]);
-        $response = $this->getOAuthClient()->send($this->base_url, $params, $method);
-        $result   = json_decode($response->getContent(), true);
+        $response = $this->send($method, $this->base_url, array_merge(
+            $params,
+            ['format' => $this->getFormat()]
+        ));
+        
+        
+        $result = json_decode($response->getContent(), true);
         
         // Sometimes the API responses are wrapped in a useless wrapper array.
         $result = 1 === count($result) ? current($result) : $result;
@@ -262,6 +266,28 @@ class FatSecret
         }
         
         return $result;
+    }
+    
+    /**
+     * Make the OAuth request.
+     * 
+     * @param String   $method
+     * @param String   $url
+     * @param String[] $params
+     *
+     * @return \Buzz\Message\MessageInterface
+     */
+    private function send($method, $url, array $params)
+    {
+        try {
+            return $this->getOAuthClient()->send($url, $params, $method);
+        } catch (RequestException $e) {
+            if (($timeout = $this->getTimeout()) && $timeout >= 30) {
+                return null;
+            }
+            
+            return $this->setTimeout(5 + $timeout)->send($method, $url, $params);
+        }
     }
     
     /**
@@ -307,5 +333,38 @@ class FatSecret
         }
         
         return true;
+    }
+    
+    /**
+     * Gets the CURL client.
+     * 
+     * @return AbstractClient
+     */
+    protected function getHttpClient()
+    {
+        return $this->getOAuthClient()->getHttpClient()->getClient();
+    }
+    
+    /**
+     * Returns how long the CURL request can take before a timeout occurs.
+     * 
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->getHttpClient()->getTimeout();
+    }
+    
+    /**
+     * Sets how long a CURL request can take before it time out.
+     * 
+     * @param int $timeout
+     *
+     * @return $this
+     */
+    public function setTimeout($timeout)
+    {
+        $this->getHttpClient()->setTimeout($timeout);
+        return $this;
     }
 }
