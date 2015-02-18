@@ -14,8 +14,8 @@ class DynamicServiceCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $container->setAlias(
-            'moop.fat_secret.cache',
-            $container->getParameter('moop.fs.cache.provider.id')
+            'moop.fs.cache',
+            $container->getParameter('moop.fs.cache.provider_id')
         );
     }
 }

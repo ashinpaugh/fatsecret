@@ -5,22 +5,16 @@ imports:
 
 
 moop_fat_secret:
-    consumer_key:        ~
-    consumer_secret:     ~
-    cache_provider_type: array
+    consumer_key:        ce65ed06e1c945ad82b86b8daebe23d0
+    consumer_secret:     d2f9386d9262466ab677058705cd34a9
+    cache_provider_type: redis
     cache_providers:
         array:
-            class: Doctrine\Common\Cache\ArrayCache
-            host:  localhost
-            port:  ~
-            username: root
-            password: ~
+            id: @moop.fs.cache.array
         redis:
-            class: Doctrine\Common\Cache\RedisCache
-            host:  localhost
-            port:  6379
-            username: root
-            password: ~
+            id:   @moop.fs.cache.redis
+            host: localhost
+            port: 6379
 
 
 framework:

@@ -33,8 +33,8 @@ class MoopFatSecretExtension extends Extension
         
         // {@see DynamicServiceCompilerPass}
         $container->setParameter(
-            'moop.fs.cache.provider.id',
-            vsprintf("moop.fat_secret.cache.%s", [$config['cache_provider_type']])
+            'moop.fs.cache.provider_id',
+            vsprintf("moop.fs.cache.%s", [$config['cache_provider_type']])
         );
     }
     
@@ -51,7 +51,9 @@ class MoopFatSecretExtension extends Extension
                 continue;
             }
             
-            $container->setParameter($prefix . "$key", $value);
+            if (!$container->hasParameter($prefix . "$key")) {
+                $container->setParameter($prefix . "$key", $value);
+            }
         }
     }
 

@@ -1,14 +1,18 @@
+parameters:
+    moop.fs.cache.array.class: Doctrine\Common\Cache\ArrayCache
+    moop.fs.cache.redis.class: Doctrine\Common\Cache\RedisCache
+
 services:
-    redis:
+    cache.redis:
         class: Redis
         calls:
             - [connect, ["%moop.fs.cache.redis.host%", "%moop.fs.cache.redis.port%"]]
     
-    moop.fat_secret.cache.array:
+    moop.fs.cache.array:
         class: "%moop.fs.cache.array.class%"
     
-    moop.fat_secret.cache.redis:
+    moop.fs.cache.redis:
         class: "%moop.fs.cache.redis.class%"
         calls:
-            - [setRedis, ["@redis"]]
+            - [setRedis, ["@cache.redis"]]
     

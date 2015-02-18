@@ -2,6 +2,8 @@
 
 namespace Moop\Bundle\FatSecretBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -22,12 +24,7 @@ class Configuration implements ConfigurationInterface
         
         $rootNode
             ->children()
-                ->arrayNode('cache_providers')
-                    ->children()
-                        ->append($this->buildCacheProviderNode('array'))
-                        ->append($this->buildCacheProviderNode('redis'))
-                    ->end()
-                ->end()
+                ->append($this->buildCacheProviderNode())
                 
                 ->scalarNode('cache_provider_type')
                     ->cannotBeEmpty()
@@ -61,27 +58,26 @@ class Configuration implements ConfigurationInterface
     /**
      * Build the supported list of cache providers.
      * 
-     * @param String $type
-     *
      * @return \Symfony\Component\Config\Definition\Builder\NodeDefinition
      */
-    protected function buildCacheProviderNode($type)
+    protected function buildCacheProviderNode()
     {
-        $tree = new TreeBuilder();
-        $root = $tree->root($type);
+        $builder = new TreeBuilder();
+        $root    = $builder->root('cache_providers');
         
         $root
-            ->children()
-                ->scalarNode('class')
-                    ->cannotBeEmpty()
+            ->prototype('array')
+                ->children()
+                    ->scalarNode('id')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('class')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('host')->end()
+                    ->scalarNode('port')->end()
                 ->end()
-                
-                ->scalarNode('host')->defaultValue('localhost')->end()
-                ->scalarNode('port')->end()
-                ->scalarNode('username')->defaultValue('root')->end()
-                ->scalarNode('password')->end()
             ->end()
-            ->info('A Doctrine Cache provider to minimize API calls made for similar queries.')
         ;
         
         return $root;

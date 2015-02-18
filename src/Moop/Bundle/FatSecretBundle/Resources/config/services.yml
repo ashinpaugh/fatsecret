@@ -8,7 +8,7 @@ services:
     
     moop.fat_secret.api:
         class: Moop\Bundle\FatSecretBundle\API\FatSecret
-        arguments: ["@moop.fat_secret.cache", "@moop.oauth.version_one", "%moop.fs.api_base_url%"]
+        arguments: ["@moop.fs.cache", "@moop.oauth.version_one", "%moop.fs.api_base_url%"]
     
     buzz.browser:
         class: Buzz\Browser
