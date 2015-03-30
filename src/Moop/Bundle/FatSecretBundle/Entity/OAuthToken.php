@@ -41,10 +41,12 @@ class OAuthToken
      * @param String $token
      * @param String $secret
      */
-    public function __construct($token, $secret)
+    public function __construct(OAuthProvider $provider, $token, $secret)
     {
         $this->token  = $token;
         $this->secret = $secret;
+        
+        $provider->addToken($this);
     }
     
     /**

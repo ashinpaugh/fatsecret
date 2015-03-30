@@ -187,17 +187,17 @@ class FatSecret
     
     /**
      * Add a meal to a user's food diary.
-     * 
+     *
      * @param Integer $food_id
-     * @param String  $entry_name
      * @param Integer $serving_id
-     * @param Float   $portion
+     * @param String  $entry_name
      * @param String  $meal
+     * @param Float   $portion
      *
      * @return Array
      * @throws FatException
      */
-    public function addFoodEntry($food_id, $entry_name, $serving_id, $portion, $meal)
+    public function addFoodEntry($food_id, $serving_id, $entry_name, $meal, $portion)
     {
         if (!in_array($meal, ['breakfast', 'lunch', 'dinner', 'other'])) {
             throw new FatException('Invalid meal type provided');

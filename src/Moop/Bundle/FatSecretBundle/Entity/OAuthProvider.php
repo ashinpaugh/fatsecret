@@ -104,6 +104,8 @@ class OAuthProvider
     public function addToken(OAuthToken $token)
     {
         $this->tokens->add($token);
+        $token->setProvider($this);
+        
         return $this;
     }
     
@@ -223,6 +225,19 @@ class OAuthProvider
     public function setOauthVersion($oauth_version)
     {
         $this->oauth_version = $oauth_version;
+        return $this;
+    }
+    
+    /**
+     * Remove a token from the collection.
+     * 
+     * @param OAuthToken $token
+     *
+     * @return $this
+     */
+    public function removeToken(OAuthToken $token)
+    {
+        $this->tokens->removeElement($token);
         return $this;
     }
 }
