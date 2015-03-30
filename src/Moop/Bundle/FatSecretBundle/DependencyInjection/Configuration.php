@@ -76,6 +76,8 @@ class Configuration implements ConfigurationInterface
                     ->end()
                     ->scalarNode('host')->end()
                     ->scalarNode('port')->end()
+                    ->scalarNode('username')->end()
+                    ->scalarNode('password')->end()
                 ->end()
             ->end()
         ;
