@@ -64,7 +64,7 @@ class FatSecret
      */
     public function createProfile($user_id)
     {
-        return $this->makeRequest('POST',  [
+        return $this->makeRequest('POST', false, [
             'method'  => 'profile.create',
             'user_id' => $user_id,
         ]);
@@ -81,7 +81,7 @@ class FatSecret
      */
     public function getAuthTokenInfo($user_id)
     {
-        return $this->makeRequest('POST',  [
+        return $this->makeRequest('POST', false, [
             'method'  => 'profile.get_auth',
             'user_id' => $user_id,
         ]);
@@ -99,7 +99,7 @@ class FatSecret
     {
         $this->checkAndSyncTokens($auth_token, $auth_secret);
         
-        return $this->makeRequest('GET',  [
+        return $this->makeRequest('GET', false, [
             'method'             => 'profile.get',
             'oauth_token'        => $auth_token,
             'oauth_token_secret' => $auth_secret,
@@ -117,7 +117,7 @@ class FatSecret
      */
     public function searchFood($search, $max_results = 15, $page_number = 0)
     {
-        return $this->makeRequest('GET',  [
+        return $this->makeRequest('GET', false, [
             'method'            => 'foods.search',
             'max_results'       => $max_results,
             'page_number'       => $page_number,
@@ -134,7 +134,7 @@ class FatSecret
      */
     public function getFood($food_id)
     {
-        return $this->makeRequest('GET',  [
+        return $this->makeRequest('GET', false, [
             'method'  => 'food.get',
             'food_id' => $food_id,
         ]);
@@ -151,7 +151,7 @@ class FatSecret
      */
     public function searchRecipes($search, $max_results = 15, $page_number = 0)
     {
-        return $this->makeRequest('GET',  [
+        return $this->makeRequest('GET', false, [
             'method'            => 'recipes.search',
             'max_results'       => $max_results,
             'page_number'       => $page_number,
@@ -167,19 +167,60 @@ class FatSecret
      */
     public function getExercisesTypes()
     {
-        return $this->makeRequest('GET', [
+        return $this->makeRequest('GET', false, [
             'method' => 'exercises.get',
         ]);
     }
     
-    public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'lb', $height_type = 'inch', $auth_token = null, $auth_secret = null)
+    public function getFoodEntries($entry_id = null, $date = null)
     {
-        $this->checkAndSyncTokens($auth_token, $auth_secret);
+        if (!$entry_id && !$date) {
+            throw new FatException('You must provide either a food entry ID or the number of days since epoch.');
+        }
         
-        return $this->makeRequest('POST', [
+        return $this->makeRequest('POST', true, array_filter([
+            'method'        => 'food_entries.get',
+            'date'          => $date,
+            'food_entry_id' => $entry_id,
+        ]));
+    }
+    
+    /**
+     * Add a meal to a user's food diary.
+     * 
+     * @param Integer $food_id
+     * @param String  $entry_name
+     * @param Integer $serving_id
+     * @param Float   $portion
+     * @param String  $meal
+     *
+     * @return Array
+     * @throws FatException
+     */
+    public function addFoodEntry($food_id, $entry_name, $serving_id, $portion, $meal)
+    {
+        if (!in_array($meal, ['breakfast', 'lunch', 'dinner', 'other'])) {
+            throw new FatException('Invalid meal type provided');
+        }
+        
+        $this->checkOAuthTokenPresence();
+        
+        return $this->makeRequest('POST', true, [
+            'method'          => 'food_entry.create',
+            'food_id'         => $food_id,
+            'food_entry_name' => $entry_name,
+            'serving_id'      => $serving_id,
+            'number_of_units' => $portion,
+            'meal'            => $meal,
+        ]);
+    }
+    
+    public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'lb', $height_type = 'inch')
+    {
+        $this->checkOAuthTokenPresence();
+        
+        return $this->makeRequest('POST', true, [
             'method'             => 'weight.update',
-            'oauth_token'        => $auth_token,
-            'oauth_token_secret' => $auth_secret,
             'current_weight_kg'  => $weight,
             'current_height_cm'  => $height_cm,
             'weight_type'        => $weight_type,
@@ -198,9 +239,11 @@ class FatSecret
      */
     public function setUserOAuthTokens(FatUserInterface $user)
     {
+        $token = $user->getOAuthToken('fat_secret');
+        
         $this->getOAuthClient()
-            ->setOAuthToken($user->getOAuthToken())
-            ->setOAuthTokenSecret($user->getOAuthTokenSecret())
+            ->setOAuthToken($token->getToken())
+            ->setOAuthTokenSecret($token->getSecret())
         ;
         
         return $this;
@@ -235,19 +278,25 @@ class FatSecret
     
     /**
      * Make the OAuth request to FS.
-     * 
-     * @param String $method
-     * @param array  $params
+     *
+     * @param String  $method
+     * @param Boolean $oauth_required
+     * @param array   $params
      *
      * @return Array
      */
-    protected function makeRequest($method, array $params)
+    protected function makeRequest($method, $oauth_required, array $params)
     {
-        $cache_key = implode('-', array_merge([$method], $params));
-        $can_cache = 'GET' === $method;
+        if ($oauth_required) {
+            $client = $this->getOAuthClient();
+            $params = array_merge($params, [
+                'oauth_token'        => $client->getOAuthToken(),
+                'oauth_token_secret' => $client->getOAuthTokenSecret(),
+            ]);
+        }
         
-        if ($can_cache && ($content = $this->cache->fetch($cache_key))) {
-            return $content;
+        if ($result = $this->checkCache($method, $params, $can_cache, $cache_key)) {
+            return $result;
         }
         
         $response = $this->send($method, $this->base_url, array_merge(
@@ -288,6 +337,28 @@ class FatSecret
             
             return $this->setTimeout(5 + $timeout)->send($method, $url, $params);
         }
+    }
+    
+    /**
+     * Check the cache before making a request to FS.
+     * 
+     * @param String   $method
+     * @param array    $params
+     * @param Boolean &$can_cache
+     * @param String  &$cache_key
+     *
+     * @return mixed
+     */
+    private function checkCache($method, array $params, &$can_cache, &$cache_key)
+    {
+        $cache_key = implode('-', array_merge([$method], $params));
+        $can_cache = 'GET' === $method;
+        
+        if ($can_cache && ($content = $this->cache->fetch($cache_key))) {
+            return $content;
+        }
+        
+        return null;
     }
     
     /**

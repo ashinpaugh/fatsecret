@@ -2,6 +2,9 @@
 
 namespace Moop\Bundle\FatSecretBundle\API;
 
+use Moop\Bundle\FatSecretBundle\Entity\OAuthProvider;
+use Moop\Bundle\FatSecretBundle\Entity\OAuthToken;
+
 /**
  * An OAuth interface for User objects.
  * 
@@ -12,28 +15,36 @@ interface OAuthConsumerInterface
     /**
      * Get the OAuth token.
      * 
-     * @return string
+     * @return OAuthToken[]
      */
-    public function getOAuthToken();
+    public function getOAuthTokens();
+    
+    /**
+     * Get the OAuth token.
+     * 
+     * @param mixed $provider
+     * 
+     * @return OAuthToken
+     */
+    public function getOAuthToken($provider);
     
     /**
      * Set the OAuth token.
      * 
-     * @return $this
-     */
-    public function setOAuthToken($token);
-    
-    /**
-     * Get the OAuth token secret.
-     * 
-     * @return string
-     */
-    public function getOAuthTokenSecret();
-    
-    /**
-     * Set the OAuth token secret.
+     * @param OAuthProvider $provider
+     * @param String        $token
+     * @param String        $secret
      * 
      * @return $this
      */
-    public function setOAuthTokenSecret($token_secret);
+    public function addOAuthToken(OAuthProvider $provider, $token, $secret);
+    
+    /**
+     * Remove a token that's associated with a user.
+     * 
+     * @param OAuthToken $token
+     * 
+     * @return $this
+     */
+    public function removeOAuthToken(OAuthToken $token);
 }

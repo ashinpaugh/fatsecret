@@ -15,7 +15,7 @@ class OAuthProvider
     
     /**
      * @ORM\OneToMany(targetEntity="OAuthToken", mappedBy="provider")
-     * @var OAuthToken[]
+     * @var OAuthToken[]|ArrayCollection
      */
     protected $tokens;
     
@@ -57,7 +57,16 @@ class OAuthProvider
      */
     protected $oauth_version;
     
-    public function __construct($name, $url, $token, $secret, $version = self::v1)
+    /**
+     * Construct.
+     * 
+     * @param String $name
+     * @param String $token
+     * @param String $secret
+     * @param String $url
+     * @param string $version
+     */
+    public function __construct($name, $token, $secret, $url, $version = self::v1)
     {
         $this->tokens        = new ArrayCollection();
         $this->name          = $name;

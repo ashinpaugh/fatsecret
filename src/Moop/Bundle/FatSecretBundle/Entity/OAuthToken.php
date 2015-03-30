@@ -8,7 +8,7 @@ use Moop\Bundle\FatSecretBundle\API\OAuthConsumerInterface;
 /**
  * @ORM\Entity()
  */
-class OAuthToken implements OAuthConsumerInterface
+class OAuthToken
 {
     /**
      * @ORM\Id()
@@ -27,13 +27,13 @@ class OAuthToken implements OAuthConsumerInterface
      * @ORM\Column(type="string")
      * @var String
      */
-    protected $oauth_token;
+    protected $token;
     
     /**
      * @ORM\Column(type="string")
      * @var String
      */
-    protected $oauth_token_secret;
+    protected $secret;
     
     /**
      * Constructor.
@@ -43,8 +43,8 @@ class OAuthToken implements OAuthConsumerInterface
      */
     public function __construct($token, $secret)
     {
-        $this->oauth_token        = $token;
-        $this->oauth_token_secret = $secret;
+        $this->token  = $token;
+        $this->secret = $secret;
     }
     
     /**
@@ -68,36 +68,38 @@ class OAuthToken implements OAuthConsumerInterface
     }
     
     /**
-     * {@inheritdoc}
+     * @return String
      */
-    public function getOAuthToken()
+    public function getToken()
     {
-        return $this->oauth_token;
+        return $this->token;
     }
     
     /**
-     * {@inheritdoc}
+     * @param String $token
+     * @return $this
      */
-    public function setOAuthToken($token)
+    public function setToken($token)
     {
-        $this->oauth_token = $token;
+        $this->token = $token;
         return $this;
     }
     
     /**
-     * {@inheritdoc}
+     * @return String
      */
-    public function getOAuthTokenSecret()
+    public function getSecret()
     {
-        return $this->oauth_token_secret;
+        return $this->secret;
     }
     
     /**
-     * {@inheritdoc}
+     * @param String $token_secret
+     * @return $this
      */
-    public function setOAuthTokenSecret($token_secret)
+    public function setSecret($token_secret)
     {
-        $this->oauth_token_secret = $token_secret;
+        $this->secret = $token_secret;
         return $this;
     }
     
@@ -110,7 +112,7 @@ class OAuthToken implements OAuthConsumerInterface
     }
     
     /**
-     * @param mixed $provider
+     * @param OAuthProvider $provider
      *
      * @return OAuthToken
      */
