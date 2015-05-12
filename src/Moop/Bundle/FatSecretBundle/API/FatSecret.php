@@ -3,12 +3,10 @@
 namespace Moop\Bundle\FatSecretBundle\API;
 
 use Buzz\Client\AbstractClient;
-use Buzz\Client\ClientInterface;
-use Buzz\Exception\RequestException;
+use Buzz\Exception\ExceptionInterface;
 use Doctrine\Common\Cache\CacheProvider;
 use Moop\Bundle\FatSecretBundle\Exception\FatException;
 use Moop\Bundle\FatSecretBundle\Utility\OAuth;
-use stdClass;
 
 /**
  * FatSecret API Library.
@@ -60,7 +58,7 @@ class FatSecret
      * 
      * @param String $user_id
      *
-     * @return stdClass
+     * @return Array
      */
     public function createProfile($user_id)
     {
@@ -77,7 +75,7 @@ class FatSecret
      * 
      * @param String $user_id
      *
-     * @return stdClass
+     * @return Array
      */
     public function getAuthTokenInfo($user_id)
     {
@@ -215,7 +213,19 @@ class FatSecret
         ]);
     }
     
-    public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'lb', $height_type = 'inch')
+    /**
+     * Weigh in.
+     * 
+     * @param Int    $weight
+     * @param Int    $goal_weight_kg
+     * @param Int    $height_cm
+     * @param string $weight_type
+     * @param string $height_type
+     *
+     * @return Array
+     * @throws FatException
+     */
+    public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'kg', $height_type = 'cm')
     {
         $this->checkOAuthTokenPresence();
         
@@ -284,6 +294,7 @@ class FatSecret
      * @param array   $params
      *
      * @return Array
+     * @throws FatException
      */
     protected function makeRequest($method, $oauth_required, array $params)
     {
@@ -304,6 +315,9 @@ class FatSecret
             ['format' => $this->getFormat()]
         ));
         
+        if (!$response) {
+            throw new FatException('An error occurred when attempting to contact FatSecret\s API.');
+        }
         
         $result = json_decode($response->getContent(), true);
         
@@ -330,7 +344,7 @@ class FatSecret
     {
         try {
             return $this->getOAuthClient()->send($url, $params, $method);
-        } catch (RequestException $e) {
+        } catch (ExceptionInterface $e) {
             if (($timeout = $this->getTimeout()) && $timeout >= 30) {
                 return null;
             }
