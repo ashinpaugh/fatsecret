@@ -175,25 +175,22 @@ class FatSecret
     /**
      * Return the entries from the user's food diary for a particular date
      * or specified ID.
-     * 
-     * @param Integer|null $entry_id Optional. Get a specific entry.
-     * @param Integer|null $date     Optional. Seconds since epoch.
+     *
+     * @param Integer|null           $entry_id Optional. Get a specific entry.
+     * @param \DateTime|Integer|null $date     Optional. Seconds since epoch.
      *
      * @return Array
      * @throws FatException
      */
     public function getFoodEntries($entry_id = null, $date = null)
     {
-        $date = new \DateTime($date);
-        $days = ceil($date->format('U') / 86400);
-        
         if (!$entry_id && !$date) {
             throw new FatException('You must provide either a food entry ID or the number of days since epoch.');
         }
         
         return $this->makeRequest('POST', true, array_filter([
             'method'        => 'food_entries.get',
-            'date'          => $days,
+            'date'          => $this->getDate($date),
             'food_entry_id' => $entry_id,
         ]));
     }
@@ -201,21 +198,18 @@ class FatSecret
     /**
      * Add a meal to a user's food diary.
      *
-     * @param Integer $food_id
-     * @param Integer $serving_id
-     * @param String  $entry_name
-     * @param String  $meal
-     * @param Float   $portion
-     * @param Integer $date      Optional. Seconds since epoch.
+     * @param Integer           $food_id
+     * @param Integer           $serving_id
+     * @param String            $entry_name
+     * @param String            $meal
+     * @param Float             $portion
+     * @param \DateTime|Integer $date      Optional. Seconds since epoch.
      *
      * @return Array
      * @throws FatException
      */
     public function addFoodEntry($food_id, $serving_id, $entry_name, $meal, $portion, $date = null)
     {
-        $date = new \DateTime($date);
-        $days = ceil($date->format('U') / 86400);
-        
         if (!in_array($meal, ['breakfast', 'lunch', 'dinner', 'other'])) {
             throw new FatException('Invalid meal type provided');
         }
@@ -229,7 +223,7 @@ class FatSecret
             'serving_id'      => $serving_id,
             'number_of_units' => $portion,
             'meal'            => $meal,
-            'date'            => $days,
+            'date'            => $this->getDate($date),
         ]);
     }
     
@@ -471,5 +465,25 @@ class FatSecret
     {
         $this->getHttpClient()->setTimeout($timeout);
         return $this;
+    }
+    
+    /**
+     * Get a \DateTime object.
+     *
+     * @param \DateTime|Integer|null $date
+     *
+     * @return \DateTime|null
+     */
+    private function getDate($date)
+    {
+        if (!$date || (!$date instanceof \DateTime && !is_numeric($date))) {
+            return null;
+        }
+        
+        if (is_numeric($date)) {
+            $date = \DateTime::createFromFormat('U', $date);
+        }
+        
+        return ceil($date->format('U') / 86400);
     }
 }
