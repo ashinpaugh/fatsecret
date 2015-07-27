@@ -216,7 +216,7 @@ class FatSecret
         
         $this->checkOAuthTokenPresence();
         
-        return $this->makeRequest('POST', true, [
+        return $this->makeRequest('POST', true, array_filter([
             'method'          => 'food_entry.create',
             'food_id'         => $food_id,
             'food_entry_name' => $entry_name,
@@ -224,7 +224,7 @@ class FatSecret
             'number_of_units' => $portion,
             'meal'            => $meal,
             'date'            => $this->getDate($date),
-        ]);
+        ]));
     }
     
     /**

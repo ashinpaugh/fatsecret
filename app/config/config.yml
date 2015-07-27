@@ -5,8 +5,8 @@ imports:
 
 
 moop_fat_secret:
-    consumer_key:        ce65ed06e1c945ad82b86b8daebe23d0
-    consumer_secret:     d2f9386d9262466ab677058705cd34a9
+    consumer_key:        "%moop.fs.oauth.consumer_key%"
+    consumer_secret:     "%moop.fs.oauth.consumer_secret%"
     cache_provider_type: redis
     cache_providers:
         array:
