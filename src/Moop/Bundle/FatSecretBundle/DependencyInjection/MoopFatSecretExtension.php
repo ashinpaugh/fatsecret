@@ -51,8 +51,8 @@ class MoopFatSecretExtension extends Extension
                 continue;
             }
             
-            if (!$container->hasParameter($prefix . "$key")) {
-                $container->setParameter($prefix . "$key", $value);
+            if (!$container->hasParameter($prefix . $key)) {
+                $container->setParameter($prefix . $key, $value);
             }
         }
     }

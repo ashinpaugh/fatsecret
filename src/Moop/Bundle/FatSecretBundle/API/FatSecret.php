@@ -6,7 +6,7 @@ use Buzz\Client\AbstractClient;
 use Buzz\Exception\ExceptionInterface;
 use Doctrine\Common\Cache\CacheProvider;
 use Moop\Bundle\FatSecretBundle\Exception\FatException;
-use Moop\Bundle\FatSecretBundle\Utility\OAuth;
+use Moop\oAuth\Util\oAuth;
 
 /**
  * FatSecret API Library.
@@ -22,7 +22,7 @@ class FatSecret
     protected $cache;
     
     /**
-     * @var OAuth
+     * @var oAuth
      */
     protected $oauth_client;
     
@@ -40,10 +40,10 @@ class FatSecret
      * @Construct.
      *
      * @param CacheProvider $cache
-     * @param OAuth         $client
+     * @param oAuth         $client
      * @param String        $base_url
      */
-    public function __construct(CacheProvider $cache, OAuth $client, $base_url)
+    public function __construct(CacheProvider $cache, oAuth $client, $base_url)
     {
         $this->format       = 'json';
         $this->cache        = $cache;
@@ -60,7 +60,7 @@ class FatSecret
      * 
      * @param String $user_id
      *
-     * @return Array
+     * @return String[]
      */
     public function createProfile($user_id)
     {
@@ -77,7 +77,7 @@ class FatSecret
      * 
      * @param String $user_id
      *
-     * @return Array
+     * @return String[]
      */
     public function getAuthTokenInfo($user_id)
     {
@@ -93,7 +93,7 @@ class FatSecret
      * @param String $auth_token
      * @param String $auth_secret
      *
-     * @return Array
+     * @return String[]
      */
     public function getProfile($auth_token = null, $auth_secret = null)
     {
@@ -113,7 +113,7 @@ class FatSecret
      * @param Integer $max_results
      * @param Integer $page_number
      *
-     * @return Array
+     * @return String[]
      */
     public function searchFood($search, $max_results = 15, $page_number = 0)
     {
@@ -130,7 +130,7 @@ class FatSecret
      * 
      * @param Integer $food_id
      *
-     * @return Array
+     * @return String[]
      */
     public function getFood($food_id)
     {
@@ -147,7 +147,7 @@ class FatSecret
      * @param Integer $max_results
      * @param Integer $page_number
      *
-     * @return Array
+     * @return String[]
      */
     public function searchRecipes($search, $max_results = 15, $page_number = 0)
     {
@@ -163,7 +163,7 @@ class FatSecret
      * Fetches the Exercise types supported by FatSecret.
      * Should be cached for a long period of time.
      * 
-     * @return Array
+     * @return String[]
      */
     public function getExercisesTypes()
     {
@@ -179,7 +179,7 @@ class FatSecret
      * @param Integer|null           $entry_id Optional. Get a specific entry.
      * @param \DateTime|Integer|null $date     Optional. Seconds since epoch.
      *
-     * @return Array
+     * @return String[]
      * @throws FatException
      */
     public function getFoodEntries($entry_id = null, $date = null)
@@ -205,7 +205,7 @@ class FatSecret
      * @param Float             $portion
      * @param \DateTime|Integer $date      Optional. Seconds since epoch.
      *
-     * @return Array
+     * @return String[]
      * @throws FatException
      */
     public function addFoodEntry($food_id, $serving_id, $entry_name, $meal, $portion, $date = null)
@@ -236,7 +236,7 @@ class FatSecret
      * @param string $weight_type
      * @param string $height_type
      *
-     * @return Array
+     * @return String[]
      * @throws FatException
      */
     public function weighIn($weight, $goal_weight_kg, $height_cm, $weight_type = 'kg', $height_type = 'cm')
@@ -254,12 +254,12 @@ class FatSecret
     }
     
     /**
-     * Sets the OAuth tokens for a user so we don't have to pass in the
+     * Sets the oAuth tokens for a user so we don't have to pass in the
      * tokens to the actual requests.
      * 
      * @param FatUserInterface $user
      *
-     * @return $this
+     * @return FatSecret
      */
     public function setUserOAuthTokens(FatUserInterface $user)
     {
@@ -276,7 +276,7 @@ class FatSecret
     /**
      * Get FatSecret's response format.
      * 
-     * @return $this
+     * @return String
      */
     public function getFormat()
     {
@@ -301,13 +301,13 @@ class FatSecret
     }
     
     /**
-     * Make the OAuth request to FS.
+     * Make the oAuth request to FS.
      *
      * @param String  $method
      * @param Boolean $oauth_required
-     * @param array   $params
+     * @param Mixed[] $params
      *
-     * @return Array
+     * @return String[]
      * @throws FatException
      */
     protected function makeRequest($method, $oauth_required, array $params)
@@ -346,7 +346,7 @@ class FatSecret
     }
     
     /**
-     * Make the OAuth request.
+     * Make the oAuth request.
      * 
      * @param String   $method
      * @param String   $url
@@ -390,7 +390,7 @@ class FatSecret
     }
     
     /**
-     * @return OAuth
+     * @return oAuth
      */
     protected function getOAuthClient()
     {
@@ -398,7 +398,7 @@ class FatSecret
     }
     
     /**
-     * Ensures that valid OAuth tokens are passed to the API.
+     * Ensures that valid oAuth tokens are passed to the API.
      * 
      * @param String &$auth_token
      * @param String &$auth_secret
@@ -418,7 +418,7 @@ class FatSecret
     }
     
     /**
-     * See if the OAuth tokens were set when required by the API.
+     * See if the oAuth tokens were set when required by the API.
      * 
      * @return bool
      * @throws FatException
@@ -484,6 +484,6 @@ class FatSecret
             $date = \DateTime::createFromFormat('U', $date);
         }
         
-        return ceil($date->format('U') / 86400);
+        return floor($date->format('U') / 86400);
     }
 }

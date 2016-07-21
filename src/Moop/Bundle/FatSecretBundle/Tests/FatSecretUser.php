@@ -2,19 +2,24 @@
 
 namespace Moop\Bundle\FatSecretBundle\Tests;
 
-
 use Doctrine\Common\Collections\ArrayCollection;
 use Moop\Bundle\FatSecretBundle\API\FatUserInterface;
-use Moop\Bundle\FatSecretBundle\Entity\OAuthProvider;
-use Moop\Bundle\FatSecretBundle\Entity\OAuthToken;
+use Moop\oAuth\Entity\OAuthProvider;
+use Moop\oAuth\Entity\OAuthToken;
 
 class FatSecretUser implements FatUserInterface
 {
     /**
-     * @var ArrayCollection
+     * @var OAuthToken[]
      */
     protected $tokens;
-        
+    
+    /**
+     * FatSecretUser constructor.
+     *
+     * @param String $token
+     * @param String $secret
+     */
     public function __construct($token, $secret)
     {
         $this->tokens = new ArrayCollection();
