@@ -3,7 +3,7 @@ imports:
 
 services:
     moop.oauth.version_one:
-        class:     Moop\Bundle\FatSecretBundle\Utility\OAuth
+        class:     Moop\oAuth\Util\oAuth
         arguments: ["@buzz.browser", "%moop.fs.consumer_key%", "%moop.fs.consumer_secret%"]
     
     moop.fat_secret.api:

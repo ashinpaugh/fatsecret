@@ -330,7 +330,7 @@ class FatSecret
         ));
         
         if (!$response) {
-            throw new FatException('An error occurred when attempting to contact FatSecret\s API.');
+            throw new FatException("An error occurred when attempting to contact FatSecret's API.");
         }
         
         $result = json_decode($response->getContent(), true);
