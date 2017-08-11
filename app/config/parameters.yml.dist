@@ -18,3 +18,7 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret:            ThisTokenIsNotSoSecretChangeIt
+
+    # The FatSecret consumer key/secret.
+    fs.oauth.consumer_key:    ~
+    fs.oauth.consumer_secret: ~

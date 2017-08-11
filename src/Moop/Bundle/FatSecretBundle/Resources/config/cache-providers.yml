@@ -14,5 +14,5 @@ services:
     moop.fs.cache.redis:
         class: "%moop.fs.cache.redis.class%"
         calls:
-            - [setRedis, [@cache.redis]]
+            - [setRedis, ["@cache.redis"]]
     

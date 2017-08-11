@@ -2,7 +2,7 @@
 
 namespace Moop\Bundle\FatSecretBundle\API;
 
-use Moop\oAuth\Decorator\oAuthConsumerInterface;
+use Moop\Bundle\OAuthBundle\Decorator\oAuthConsumerInterface;
 
 /**
  * Interface for getting and setting FatSecret's OAuth tokens.

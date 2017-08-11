@@ -1,11 +1,6 @@
 imports:
     - { resource: parameters.yml }
-    - { resource: security.yml }
     - { resource: services.yml }
-
-parameters:
-    fs.oauth.consumer_key:    ~
-    fs.oauth.consumer_secret: ~
 
 moop_fat_secret:
     consumer_key:        "%fs.oauth.consumer_key%"
@@ -13,9 +8,9 @@ moop_fat_secret:
     cache_provider_type: array
     cache_providers:
         array:
-            id:   @moop.fs.cache.array
+            id:   "@moop.fs.cache.array"
         redis:
-            id:   @moop.fs.cache.redis
+            id:   "@moop.fs.cache.redis"
             host: localhost
             port: 6379
 

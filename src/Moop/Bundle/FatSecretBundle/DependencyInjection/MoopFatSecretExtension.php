@@ -36,6 +36,8 @@ class MoopFatSecretExtension extends Extension
             'moop.fs.cache.provider_id',
             vsprintf("moop.fs.cache.%s", [$config['cache_provider_type']])
         );
+        
+        
     }
     
     /**

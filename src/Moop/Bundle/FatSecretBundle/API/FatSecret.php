@@ -6,7 +6,7 @@ use Buzz\Client\AbstractClient;
 use Buzz\Exception\ExceptionInterface;
 use Doctrine\Common\Cache\CacheProvider;
 use Moop\Bundle\FatSecretBundle\Exception\FatException;
-use Moop\oAuth\Util\oAuth;
+use Moop\Bundle\OAuthBundle\Util\AuthConsumer;
 
 /**
  * FatSecret API Library.
@@ -22,7 +22,7 @@ class FatSecret
     protected $cache;
     
     /**
-     * @var oAuth
+     * @var AuthConsumer
      */
     protected $oauth_client;
     
@@ -40,10 +40,10 @@ class FatSecret
      * @Construct.
      *
      * @param CacheProvider $cache
-     * @param oAuth         $client
+     * @param AuthConsumer  $client
      * @param String        $base_url
      */
-    public function __construct(CacheProvider $cache, oAuth $client, $base_url)
+    public function __construct(CacheProvider $cache, AuthConsumer $client, $base_url)
     {
         $this->format       = 'json';
         $this->cache        = $cache;
@@ -390,7 +390,7 @@ class FatSecret
     }
     
     /**
-     * @return oAuth
+     * @return AuthConsumer
      */
     protected function getOAuthClient()
     {
@@ -464,6 +464,24 @@ class FatSecret
     public function setTimeout($timeout)
     {
         $this->getHttpClient()->setTimeout($timeout);
+        return $this;
+    }
+    
+    /**
+     * Set the consumer tokens used for the oAuth v1 calls.
+     * 
+     * @param String $key
+     * @param String $secret
+     *
+     * @return $this
+     */
+    public function setConsumerTokens($key, $secret)
+    {
+        $this->getOAuthClient()
+            ->setConsumerKey($key)
+            ->setConsumerSecret($secret)
+        ;
+        
         return $this;
     }
     

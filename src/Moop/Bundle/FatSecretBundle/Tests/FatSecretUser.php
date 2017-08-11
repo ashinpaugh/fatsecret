@@ -4,8 +4,8 @@ namespace Moop\Bundle\FatSecretBundle\Tests;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Moop\Bundle\FatSecretBundle\API\FatUserInterface;
-use Moop\oAuth\Entity\OAuthProvider;
-use Moop\oAuth\Entity\OAuthToken;
+use Moop\Bundle\OAuthBundle\Entity\OAuthProvider;
+use Moop\Bundle\OAuthBundle\Entity\OAuthToken;
 
 class FatSecretUser implements FatUserInterface
 {
